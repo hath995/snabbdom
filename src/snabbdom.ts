@@ -45,37 +45,9 @@ const hooks: (keyof Module)[] = ['create', 'update', 'remove', 'destroy', 'pre',
 export {h} from './h';
 export {thunk} from './thunk';
 
-export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
-  let i: number, j: number, cbs = ({} as ModuleHooks);
-
-  const api: DOMAPI = domApi !== undefined ? domApi : htmlDomApi;
-
-  for (i = 0; i < hooks.length; ++i) {
-    cbs[hooks[i]] = [];
-    for (j = 0; j < modules.length; ++j) {
-      const hook = modules[j][hooks[i]];
-      if (hook !== undefined) {
-        (cbs[hooks[i]] as Array<any>).push(hook);
-      }
-    }
-  }
-
-  function emptyNodeAt(elm: Element) {
-    const id = elm.id ? '#' + elm.id : '';
-    const c = elm.className ? '.' + elm.className.split(' ').join('.') : '';
-    return vnode(api.tagName(elm).toLowerCase() + id + c, {}, [], undefined, elm);
-  }
-
-  function createRmCb(childElm: Node, listeners: number) {
-    return function rmCb() {
-      if (--listeners === 0) {
-        const parent = api.parentNode(childElm);
-        api.removeChild(parent, childElm);
-      }
-    };
-  }
-
-  function createElm(vnode: VNode, insertedVnodeQueue: VNodeQueue): Node {
+  const api: DOMAPI = htmlDomApi;
+  const cbs = ({} as ModuleHooks)
+  export function createElm(vnode: VNode, insertedVnodeQueue: VNodeQueue): Node {
     let i: any, data = vnode.data;
     if (data !== undefined) {
       if (isDef(i = data.hook) && isDef(i = i.init)) {
@@ -121,6 +93,36 @@ export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
     }
     return vnode.elm;
   }
+
+export function init(modules: Array<Partial<Module>>, domApi?: DOMAPI) {
+  let i: number, j: number;
+
+
+  for (i = 0; i < hooks.length; ++i) {
+    cbs[hooks[i]] = [];
+    for (j = 0; j < modules.length; ++j) {
+      const hook = modules[j][hooks[i]];
+      if (hook !== undefined) {
+        (cbs[hooks[i]] as Array<any>).push(hook);
+      }
+    }
+  }
+
+  function emptyNodeAt(elm: Element) {
+    const id = elm.id ? '#' + elm.id : '';
+    const c = elm.className ? '.' + elm.className.split(' ').join('.') : '';
+    return vnode(api.tagName(elm).toLowerCase() + id + c, {}, [], undefined, elm);
+  }
+
+  function createRmCb(childElm: Node, listeners: number) {
+    return function rmCb() {
+      if (--listeners === 0) {
+        const parent = api.parentNode(childElm);
+        api.removeChild(parent, childElm);
+      }
+    };
+  }
+
 
   function addVnodes(parentElm: Node,
                      before: Node | null,
