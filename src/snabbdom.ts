@@ -72,6 +72,9 @@ export {thunk} from './thunk';
                                                                                : api.createElement(tag);
       if (hash < dot) elm.setAttribute('id', sel.slice(hash + 1, dot));
       if (dotIdx > 0) elm.setAttribute('class', sel.slice(dot + 1).replace(/\./g, ' '));
+      if(vnode.data && vnode.data.attrs && vnode.data.attrs.style) {
+        elm.setAttribute('style', vnode.data.attrs.style);
+      }
       for (i = 0; i < cbs.create.length; ++i) cbs.create[i](emptyNode, vnode);
       if (is.array(children)) {
         for (i = 0; i < children.length; ++i) {
